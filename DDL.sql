@@ -36,8 +36,8 @@ CREATE TABLE Subdistricts (
 CREATE TABLE Products (
   product_id SERIAL PRIMARY KEY,
   product_name VARCHAR(255) NOT NULL,
-  product_price DECIMAL(10,2) NOT NULL,
-  product_stock INT DEFAULT 0,
+  product_price DECIMAL(10,2) NOT NULL CHECK (product_price >= 0),
+  product_stock INT DEFAULT 0 CHECK (product_stock >= 0),
   product_details TEXT,
   product_featured_image_url VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE Cart_Items (
   cart_item_id SERIAL PRIMARY KEY,
   product_id INT REFERENCES Products(product_id) NOT NULL,
   user_id INT REFERENCES Users(user_id) NOT NULL,
-  product_quantity INT NOT NULL DEFAULT 1
+  product_quantity INT NOT NULL DEFAULT 1 CHECK (product_quantity > 0)
 )
 
 -- 1 Order bisa banyak Order Items
@@ -92,7 +92,7 @@ CREATE TABLE Orders (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   order_status VARCHAR(255) NOT NULL,
   shipment_id INT REFERENCES Shipments(shipment_id),
-  CONSTRAINT chk_payment_before_shipment CHECK (shipment_id IS NULL OR order_id IN (SELECT order_id FROM Payments))
+  payment_id INT REFERENCES Payments(payment_id)
 )
 
 -- Keterangan tabel Order_Items:
@@ -111,7 +111,8 @@ CREATE TABLE Order_Items (
 CREATE TABLE Payments (
   payment_id SERIAL PRIMARY KEY,
   payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
-  order_id INT UNIQUE REFERENCES Orders(order_id) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   payment_provider_id INT REFERENCES Payment_Providers(payment_provider_id) NOT NULL
 )
 
@@ -135,6 +136,8 @@ CREATE TABLE Shipments (
   address_id INT REFERENCES Addresses(address_id) NOT NULL,
   shipment_status VARCHAR(255) NOT NULL,
   shipment_estimation_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   shipment_provider_id INT REFERENCES Shipment_Providers(shipment_provider_id) NOT NULL
 )
 
@@ -156,7 +159,8 @@ CREATE TABLE Reviews (
 
 -- Constraint dan Trigger buat ketika nambah product atau update product
 -- yang buat nambahin product_snapshot otomatis
-CREATE OR REPLACE FUNCTION insert_product_snapshot()
+
+CREATE OR REPLACE FUNCTION insert_product_snapshot_on_insert()
 RETURNS TRIGGER AS $$
 BEGIN
   INSERT INTO Product_Snapshots (
@@ -179,12 +183,52 @@ BEGIN
     CURRENT_TIMESTAMP, 
     NEW.category_id
   );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER product_snapshot_insert_trigger
+AFTER INSERT ON Products
+FOR EACH ROW
+EXECUTE FUNCTION insert_product_snapshot_on_insert();
+
+
+-- significant change, maksudnya adalah kalau stock doang yg berubah ya ga bikin snapshot
+CREATE OR REPLACE FUNCTION insert_product_snapshot_on_significant_change()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (OLD.product_name IS DISTINCT FROM NEW.product_name OR
+      OLD.product_price IS DISTINCT FROM NEW.product_price OR
+      OLD.product_details IS DISTINCT FROM NEW.product_details OR
+      OLD.product_featured_image_url IS DISTINCT FROM NEW.product_featured_image_url OR
+      OLD.category_id IS DISTINCT FROM NEW.category_id) THEN
+    INSERT INTO Product_Snapshots (
+      product_id, 
+      product_name, 
+      product_price, 
+      product_stock, 
+      product_details, 
+      product_featured_image_url, 
+      created_at, 
+      category_id
+    )
+    VALUES (
+      NEW.product_id, 
+      NEW.product_name, 
+      NEW.product_price, 
+      NEW.product_stock, 
+      NEW.product_details, 
+      NEW.product_featured_image_url, 
+      CURRENT_TIMESTAMP, 
+      NEW.category_id
+    );
+  END IF;
   
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER product_snapshot_trigger
-AFTER INSERT OR UPDATE ON Products
+AFTER UPDATE ON Products
 FOR EACH ROW
-EXECUTE FUNCTION insert_product_snapshot();
+EXECUTE FUNCTION insert_product_snapshot_on_significant_change();
