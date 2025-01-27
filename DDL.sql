@@ -7,7 +7,20 @@ CREATE TABLE Users (
   user_role VARCHAR(50) NOT NULL DEFAULT 'member',
   user_phone VARCHAR(50) UNIQUE,
   is_active BOOLEAN DEFAULT TRUE NOT NULL
-)
+);
+
+--Kecamatan
+CREATE TABLE Districts (
+  district_id SERIAL PRIMARY KEY,
+  district_name VARCHAR(255) NOT NULL
+);
+
+--Kelurahan
+CREATE TABLE Subdistricts (
+  subdistrict_id SERIAL PRIMARY KEY,
+  subdistrict_name VARCHAR(255) NOT NULL,
+  district_id INT REFERENCES Districts(district_id) NOT NULL
+);
 
 -- Alamat user
 CREATE TABLE Addresses (
@@ -16,20 +29,14 @@ CREATE TABLE Addresses (
   address_name VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE NOT NULL,
   subdistrict_id INT REFERENCES Subdistricts(subdistrict_id) NOT NULL --Kelurahan
-)
+);
 
---Kecamatan
-CREATE TABLE Districts (
-  district_id SERIAL PRIMARY KEY,
-  district_name VARCHAR(255) NOT NULL
-)
-
---Kelurahan
-CREATE TABLE Subdistricts (
-  subdistrict_id SERIAL PRIMARY KEY,
-  subdistrict_name VARCHAR(255) NOT NULL,
-  district_id INT REFERENCES Districts(district_id) NOT NULL
-)
+-- Kategori produk
+CREATE TABLE Categories (
+  category_id SERIAL PRIMARY KEY,
+  category_name VARCHAR(255) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE NOT NULL
+);
 
 -- Produk
 -- product_featured_image_url itu gambar utama nya, yang kalau di tokped muncul di card
@@ -42,7 +49,7 @@ CREATE TABLE Products (
   product_featured_image_url VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE NOT NULL,
   category_id INT REFERENCES Categories(category_id) NOT NULL
-)
+);
 
 -- Keterangan tabel Product_Snapshots:
 -- Jadi setiap bikin atau update tabel Products, bakal ngebikin juga tabel ini
@@ -57,7 +64,7 @@ CREATE TABLE Product_Snapshots (
   product_featured_image_url VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   category_id INT REFERENCES Categories(category_id) NOT NULL
-)
+);
 
 -- Foto produk yang lain
 -- ada created_at buat nanti jadi snapshot juga
@@ -68,14 +75,7 @@ CREATE TABLE Product_Images (
   product_image_url VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   is_active BOOLEAN DEFAULT TRUE NOT NULL
-)
-
--- Kategori produk
-CREATE TABLE Categories (
-  category_id SERIAL PRIMARY KEY,
-  category_name VARCHAR(255) NOT NULL,
-  is_active BOOLEAN DEFAULT TRUE NOT NULL
-)
+);
 
 -- buat 1 product pada cart
 CREATE TABLE Cart_Items (
@@ -83,7 +83,47 @@ CREATE TABLE Cart_Items (
   product_id INT REFERENCES Products(product_id) NOT NULL,
   user_id INT REFERENCES Users(user_id) NOT NULL,
   product_quantity INT NOT NULL DEFAULT 1 CHECK (product_quantity > 0)
-)
+);
+
+-- kaya bank, e money, dll
+CREATE TABLE Payment_Categories (
+  payment_category_id SERIAL PRIMARY KEY,
+  payment_category_name VARCHAR(255) NOT NULL
+);
+
+-- kaya BCA, gopay, dll
+CREATE TABLE Payment_Providers (
+  payment_provider_id SERIAL PRIMARY KEY,
+  payment_provider_name VARCHAR(255) NOT NULL,
+  payment_category_id INT REFERENCES Payment_Categories(payment_category_id) NOT NULL
+);
+
+-- Pembayaran
+CREATE TABLE Payments (
+  payment_id SERIAL PRIMARY KEY,
+  payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  payment_provider_id INT REFERENCES Payment_Providers(payment_provider_id) NOT NULL
+);
+
+-- layanan ekspedisi, kaya jne, sicepat, dll
+CREATE TABLE Shipment_Providers (
+  shipment_provider_id SERIAL PRIMARY KEY,
+  shipment_provider_name VARCHAR(255) NOT NULL
+);
+
+-- pengiriman
+-- shipment_status itu kaya belum dikirim, dalam perjalanan, sampai pada tujuan, dll
+CREATE TABLE Shipments (
+  shipment_id SERIAL PRIMARY KEY,
+  address_id INT REFERENCES Addresses(address_id) NOT NULL,
+  shipment_status VARCHAR(255) NOT NULL,
+  shipment_estimation_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  shipment_provider_id INT REFERENCES Shipment_Providers(shipment_provider_id) NOT NULL
+);
 
 -- 1 Order bisa banyak Order Items
 CREATE TABLE Orders (
@@ -93,7 +133,7 @@ CREATE TABLE Orders (
   order_status VARCHAR(255) NOT NULL,
   shipment_id INT REFERENCES Shipments(shipment_id),
   payment_id INT REFERENCES Payments(payment_id)
-)
+);
 
 -- Keterangan tabel Order_Items:
 -- ini tabel buat produk" pada order
@@ -105,56 +145,17 @@ CREATE TABLE Order_Items (
   product_snapshot_id INT REFERENCES Product_Snapshots(product_snapshot_id) NOT NULL,
   product_quantity INT NOT NULL,
   order_id INT REFERENCES Orders(order_id) NOT NULL
-)
-
--- Pembayaran
-CREATE TABLE Payments (
-  payment_id SERIAL PRIMARY KEY,
-  payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  payment_provider_id INT REFERENCES Payment_Providers(payment_provider_id) NOT NULL
-)
-
--- kaya BCA, gopay, dll
-CREATE TABLE Payment_Providers (
-  payment_provider_id SERIAL PRIMARY KEY,
-  payment_provider_name VARCHAR(255) NOT NULL,
-  payment_category_id INT REFERENCES Payment_Categories(payment_category_id) NOT NULL
-)
-
--- kaya bank, e money, dll
-CREATE TABLE Payment_Categories (
-  payment_category_id SERIAL PRIMARY KEY,
-  payment_category_name VARCHAR(255) NOT NULL
-)
-
--- pengiriman
--- shipment_status itu kaya belum dikirim, dalam perjalanan, sampai pada tujuan, dll
-CREATE TABLE Shipments (
-  shipment_id SERIAL PRIMARY KEY,
-  address_id INT REFERENCES Addresses(address_id) NOT NULL,
-  shipment_status VARCHAR(255) NOT NULL,
-  shipment_estimation_date DATE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  shipment_provider_id INT REFERENCES Shipment_Providers(shipment_provider_id) NOT NULL
-)
-
--- layanan ekspedisi, kaya jne, sicepat, dll
-CREATE TABLE Shipment_Providers (
-  shipment_provider_id SERIAL PRIMARY KEY,
-  shipment_provider_name VARCHAR(255) NOT NULL
-)
+);
 
 -- buat review user atas produk itu, ada bintang 1-5, sama deskripsinya biasa
 CREATE TABLE Reviews (
   review_id SERIAL PRIMARY KEY,
   product_id INT REFERENCES Products(product_id) NOT NULL,
   user_id INT REFERENCES Users(user_id) NOT NULL,
+  order_id INT REFERENCES Orders(order_id) NOT NULL,
   review_stars INT NOT NULL CHECK (review_stars BETWEEN 1 AND 5),
   review_description TEXT NOT NULL
-)
+);
 
 
 -- Constraint dan Trigger buat ketika nambah product atau update product
