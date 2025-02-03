@@ -11,7 +11,7 @@ export const getAllProducts = async () => {
 export const getSingleProduct = async (product_id) => {
   const queryResult = await productRepo.getSingleProduct(product_id);
 
-  return queryResult.rows;
+  return queryResult.rows[0];
 };
 
 export const createProduct = async ({
@@ -55,10 +55,101 @@ export const createProduct = async ({
   }
 };
 
-export const deleteProduct = async (product_id) => {
-  const queryResult = await productRepo.deleteProduct(product_id);
+export const updateProduct = async ({
+  product_id,
+  product_name,
+  product_price,
+  product_stock,
+  product_details,
+  product_featured_image_url,
+  category_id,
+}) => {
+  const client = await pool.connect();
 
-  if (queryResult.rowCount === 0) {
-    throw new NotFoundError(`product with id ${product_id} is not found`);
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.updateProduct(client, {
+      product_id,
+      product_name,
+      product_price,
+      product_stock,
+      product_details,
+      product_featured_image_url,
+      category_id,
+    });
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteProduct = async (product_id) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.deleteProduct(client, product_id);
+
+    if (queryResult.rowCount === 0) {
+      throw new NotFoundError(`product with id ${product_id} is not found`);
+    }
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const addProductImages = async (product_id, additionalImages) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.insertProductImages(
+      client,
+      product_id,
+      additionalImages
+    );
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const deleteProductImage = async (product_image_id) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.deleteProductImage(
+      client,
+      product_image_id
+    );
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
   }
 };

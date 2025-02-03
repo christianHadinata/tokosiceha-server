@@ -84,6 +84,63 @@ export const createProduct = async (
   return result.rows[0].product_id;
 };
 
+export const updateProduct = async (
+  client,
+  {
+    product_id,
+    product_name,
+    product_price,
+    product_stock,
+    product_details,
+    product_featured_image_url,
+    category_id,
+  }
+) => {
+  const queryText = `
+  UPDATE
+    Products
+  SET
+    product_name = $1,
+    product_price = $2,
+    product_stock = $3,
+    product_details = $4,
+    product_featured_image_url = $5,
+    category_id = $6
+  WHERE
+    product_id = $7
+  `;
+
+  const values = [
+    product_name,
+    product_price,
+    product_stock,
+    product_details,
+    product_featured_image_url,
+    category_id,
+    product_id,
+  ];
+
+  const queryResult = await client.query(queryText, values);
+
+  return queryResult;
+};
+
+export const deleteProduct = async (client, product_id) => {
+  const queryText = `
+  UPDATE
+    Products
+  SET
+    is_active = FALSE
+  WHERE 
+    product_id = $1`;
+
+  const values = [product_id];
+
+  const queryResult = await client.query(queryText, values);
+
+  return queryResult;
+};
+
 export const insertProductImages = async (
   client,
   product_id,
@@ -102,18 +159,19 @@ export const insertProductImages = async (
   await Promise.all(queries);
 };
 
-export const deleteProduct = async (product_id) => {
+export const deleteProductImage = async (client, product_image_id) => {
   const queryText = `
   UPDATE
-    Products
+    Product_Images
   SET
     is_active = FALSE
-  WHERE 
-    product_id = $1`;
+  WHERE
+    product_image_id = $1
+  `;
 
-  const values = [product_id];
+  const values = [product_image_id];
 
-  const queryResult = await pool.query(queryText, values);
+  const queryResult = await client.query(queryText, values);
 
   return queryResult;
 };

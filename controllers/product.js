@@ -50,10 +50,60 @@ export const createProduct = async (req, res) => {
   }
 };
 
+export const updateProduct = async (req, res) => {
+  const { product_id } = req.params;
+
+  const {
+    product_name,
+    product_price,
+    product_stock,
+    product_details,
+    category_id,
+  } = req.body;
+
+  const featuredImage = req.files["featured_image"][0].filename;
+
+  const result = await productService.updateProduct({
+    product_id,
+    product_name,
+    product_price,
+    product_stock,
+    product_details,
+    category_id,
+    product_featured_image_url: featuredImage,
+    additionalImages,
+  });
+
+  return res.json({ success: true, ...result });
+};
+
 export const deleteProduct = async (req, res) => {
   const { product_id } = req.params;
 
   await productService.deleteProduct(product_id);
+
+  return res.json({ success: true });
+};
+
+export const addProductImages = async (req, res) => {
+  const { product_id } = req.params;
+
+  const additionalImages = req.files["images"]
+    ? req.files["images"].map((file) => file.filename)
+    : [];
+
+  const result = await productService.addProductImages(
+    product_id,
+    additionalImages
+  );
+
+  return res.json({ success: true, ...result });
+};
+
+export const deleteProductImage = async (req, res) => {
+  const { product_image_id } = req.body;
+
+  await productService.deleteProductImage(product_image_id);
 
   return res.json({ success: true });
 };
