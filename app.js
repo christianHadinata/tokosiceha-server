@@ -37,9 +37,11 @@ app.use(morgan("dev"));
 
 // Routes import
 import productRoute from "./routes/product.js";
+import userRoute from "./routes//user.js";
 
 // Routes
 app.use("/api/v1/products", productRoute);
+app.use("/api/v1/users", userRoute);
 
 //Error handling
 app.use(errorHandler);
