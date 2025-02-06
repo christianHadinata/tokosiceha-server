@@ -3,13 +3,12 @@ import { BadRequestError } from "../errors/BadRequestError.js";
 
 export const register = async (req, res) => {
   try {
-    const { user_email, user_password, user_name, user_phone } = req.body;
+    const { user_email, user_password, user_name } = req.body;
 
     const result = await userService.register({
       user_email,
       user_password,
       user_name,
-      user_phone,
     });
 
     return res.status(201).json({ success: true, user_id: result.user_id });

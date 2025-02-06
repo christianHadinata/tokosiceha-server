@@ -8,15 +8,10 @@ import bcrypt from "bcryptjs";
 import pool from "../db/db.js";
 import jwt from "jsonwebtoken";
 
-export const register = async ({
-  user_email,
-  user_password,
-  user_name,
-  user_phone,
-}) => {
+export const register = async ({ user_email, user_password, user_name }) => {
   const client = await pool.connect();
 
-  if (!user_email || !user_password || !user_name || !user_phone) {
+  if (!user_email || !user_password || !user_name) {
     throw new BadRequestError("All specified field must be included");
   }
 
@@ -35,7 +30,6 @@ export const register = async ({
       user_email,
       user_password: hashedPassword,
       user_name,
-      user_phone,
     });
 
     await client.query("COMMIT");

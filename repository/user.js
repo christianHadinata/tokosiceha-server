@@ -2,18 +2,18 @@ import pool from "../db/db.js";
 
 export const insertUser = async (
   client,
-  { user_email, user_password, user_name, user_phone }
+  { user_email, user_password, user_name }
 ) => {
   const queryText = `
   INSERT INTO
-    Users(user_email, user_password, user_name, user_phone)
+    Users(user_email, user_password, user_name)
   VALUES
-    ($1, $2, $3, $4)
+    ($1, $2, $3)
   RETURNING
     user_id
   `;
 
-  const values = [user_email, user_password, user_name, user_phone];
+  const values = [user_email, user_password, user_name];
 
   const result = await client.query(queryText, values);
 
