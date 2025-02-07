@@ -64,6 +64,7 @@ export const login = async ({ user_email, user_password }) => {
       user_email: user.user_email,
       user_name: user.user_name,
       user_role: user.user_role,
+      user_phone: user.user_phone,
     },
     process.env.JWT_SECRET,
     {

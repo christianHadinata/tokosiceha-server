@@ -68,7 +68,8 @@ export const getSingleUserByEmail = async (user_email) => {
     u.user_email,
     u.user_password,
     u.user_name,
-    u.user_role
+    u.user_role,
+    u.user_phone
   FROM 
     Users  u
   WHERE 
