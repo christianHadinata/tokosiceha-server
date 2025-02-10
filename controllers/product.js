@@ -1,3 +1,4 @@
+import { BadRequestError } from "../errors/BadRequestError.js";
 import * as productService from "../services/product.js";
 
 export const getAllProducts = async (req, res) => {
@@ -22,6 +23,18 @@ export const createProduct = async (req, res) => {
       product_details,
       category_id,
     } = req.body;
+
+    console.log("pname " + product_name);
+
+    if (
+      !product_name ||
+      !product_price ||
+      !product_stock ||
+      !product_details ||
+      !category_id
+    ) {
+      throw new BadRequestError("All field must be specified");
+    }
 
     if (!req.files || !req.files["featured_image"]) {
       return res.status(400).json({ message: "Featured image is required" });

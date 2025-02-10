@@ -9,6 +9,7 @@ export const getAllProducts = async () => {
     p.product_stock,
     p.product_details,
     p.product_featured_image_url,
+    c.category_id,
     c.category_name
   FROM 
     Products p 
@@ -33,6 +34,7 @@ export const getSingleProduct = async (product_id) => {
     p.product_stock,
     p.product_details,
     p.product_featured_image_url,
+    c.category_id,
     c.category_name
   FROM 
     Products p 
