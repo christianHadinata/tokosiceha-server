@@ -153,3 +153,9 @@ export const deleteProductImage = async (product_image_id) => {
     client.release();
   }
 };
+
+export const getAllCategories = async () => {
+  const queryResult = await productRepo.getAllCategories();
+
+  return queryResult.rows;
+};

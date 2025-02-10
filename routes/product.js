@@ -7,6 +7,7 @@ import {
   updateProduct,
   addProductImages,
   deleteProductImage,
+  getAllCategories,
 } from "../controllers/product.js";
 
 import { fileUpload } from "../middleware/fileUploader.js";
@@ -14,11 +15,12 @@ import { fileUpload } from "../middleware/fileUploader.js";
 const router = express.Router();
 
 router.get("/", getAllProducts);
-router.get("/:product_id", getSingleProduct);
 router.post("/", fileUpload("./public"), createProduct);
+router.get("/categories", getAllCategories);
+router.get("/:product_id", getSingleProduct);
 router.patch("/:product_id", updateProduct);
 router.delete("/:product_id", deleteProduct);
 router.post("/:product_id", fileUpload("./public"), addProductImages);
-router.delete("/:product_id", deleteProductImage);
+router.delete("/:product_id/images", deleteProductImage);
 
 export default router;
