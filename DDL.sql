@@ -44,7 +44,7 @@ CREATE TABLE Products (
   product_id SERIAL PRIMARY KEY,
   product_name VARCHAR(255) NOT NULL,
   product_price DECIMAL(10,2) NOT NULL CHECK (product_price >= 0),
-  product_stock INT DEFAULT 0 CHECK (product_stock >= 0),
+  product_stock INT DEFAULT 0,
   product_details TEXT,
   product_featured_image_url VARCHAR(255) NOT NULL,
   is_active BOOLEAN DEFAULT TRUE NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE Cart_Items (
   cart_item_id SERIAL PRIMARY KEY,
   product_id INT REFERENCES Products(product_id) NOT NULL,
   user_id INT REFERENCES Users(user_id) NOT NULL,
-  product_quantity INT NOT NULL DEFAULT 1 CHECK (product_quantity > 0)
+  product_quantity INT NOT NULL DEFAULT 1
 );
 
 -- kaya bank, e money, dll

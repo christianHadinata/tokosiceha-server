@@ -175,3 +175,19 @@ export const deleteProductImage = async (client, product_image_id) => {
 
   return queryResult;
 };
+
+export const getAllCategories = async () => {
+  const queryText = `
+  SELECT
+    c.category_id,
+    c.category_name
+  FROM
+    Categories c
+  WHERE
+    c.is_active = TRUE
+  `;
+
+  const queryResult = await pool.query(queryText);
+
+  return queryResult;
+};

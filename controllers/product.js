@@ -107,3 +107,9 @@ export const deleteProductImage = async (req, res) => {
 
   return res.json({ success: true });
 };
+
+export const getAllCategories = async (req, res) => {
+  const categories = await productService.getAllCategories();
+
+  return res.json(categories);
+};
