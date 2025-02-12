@@ -113,6 +113,14 @@ export const addProductImages = async (req, res) => {
   return res.json({ success: true, ...result });
 };
 
+export const getAdditionalProductImages = async (req, res) => {
+  const { product_id } = req.params;
+
+  const result = await productService.getAdditionalProductImages(product_id);
+
+  return res.json(result);
+};
+
 export const deleteProductImage = async (req, res) => {
   const { product_image_id } = req.body;
 

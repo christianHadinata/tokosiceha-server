@@ -8,6 +8,7 @@ import {
   addProductImages,
   deleteProductImage,
   getAllCategories,
+  getAdditionalProductImages,
 } from "../controllers/product.js";
 
 import { fileUpload } from "../middleware/fileUploader.js";
@@ -20,7 +21,8 @@ router.get("/categories", getAllCategories);
 router.get("/:product_id", getSingleProduct);
 router.patch("/:product_id", updateProduct);
 router.delete("/:product_id", deleteProduct);
-router.post("/:product_id", fileUpload("./public"), addProductImages);
+router.get("/:product_id/images", getAdditionalProductImages);
+router.post("/:product_id/images", fileUpload("./public"), addProductImages);
 router.delete("/:product_id/images", deleteProductImage);
 
 export default router;

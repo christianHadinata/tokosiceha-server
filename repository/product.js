@@ -161,6 +161,26 @@ export const insertProductImages = async (
   await Promise.all(queries);
 };
 
+export const getAdditionalProductImages = async (product_id) => {
+  const queryText = `
+  SELECT
+    p.product_image_id,
+    p.product_id,
+    p.product_image_url,
+    p.created_at
+  FROM
+    Product_Images p
+  WHERE
+    p.product_id = $1 AND p.is_active = TRUE
+  `;
+
+  const values = [product_id];
+
+  const queryResult = await pool.query(queryText, values);
+
+  return queryResult;
+};
+
 export const deleteProductImage = async (client, product_image_id) => {
   const queryText = `
   UPDATE
