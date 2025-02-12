@@ -136,6 +136,73 @@ export const getAllCategories = async (req, res) => {
   return res.json(categories);
 };
 
+export const getSingleCategory = async (req, res) => {
+  const { category_id } = req.params;
+
+  try {
+    const category = await productService.getSingleCategory(category_id);
+
+    if (category.length === 0) {
+      return res
+        .status(404)
+        .json({ message: `No category with id = ${category_id}` });
+    }
+
+    return res.json(category);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const addCategoryImages = async (req, res) => {
+  const { category_id } = req.params;
+
+  const categoryImages = req.files["category_images"]
+    ? req.files["category_images"].map((file) => file.filename)
+    : [];
+
+  const result = await productService.addCategoryImages(
+    category_id,
+    categoryImages
+  );
+
+  return res.json({ success: true, ...result });
+};
+
+export const getCategoryImages = async (req, res) => {
+  const { category_id } = req.params;
+
+  const result = await productService.getCategoryImages(category_id);
+
+  return res.json(result);
+};
+
+export const deleteCategoryImage = async (req, res) => {
+  const { category_image_id } = req.body;
+
+  await productService.deleteCategoryImage(category_image_id);
+
+  return res.json({ success: true });
+};
+
+export const getAllProductsWithCategory = async (req, res) => {
+  const { category_id } = req.params;
+
+  try {
+    const products = await productService.getAllProductsWithCategory(
+      category_id
+    );
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    return res.json(products);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 export const getAllProductsWithKeyword = async (req, res) => {
   let { keyword } = req.query;
 

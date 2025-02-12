@@ -166,6 +166,67 @@ export const getAllCategories = async () => {
   return queryResult.rows;
 };
 
+export const getSingleCategory = async (category_id) => {
+  const queryResult = await productRepo.getSingleCategory(category_id);
+
+  return queryResult.rows[0];
+};
+
+export const addCategoryImages = async (category_id, categoryImages) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.insertCategoryImages(
+      client,
+      category_id,
+      categoryImages
+    );
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getCategoryImages = async (category_id) => {
+  const queryResult = await productRepo.getCategoryImages(category_id);
+
+  return queryResult.rows;
+};
+
+export const deleteCategoryImage = async (category_image_id) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const queryResult = await productRepo.deleteCategoryImage(
+      client,
+      category_image_id
+    );
+
+    await client.query("COMMIT");
+    return { queryResult };
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+export const getAllProductsWithCategory = async (category_id) => {
+  const queryResult = await productRepo.getAllProductsWithCategory(category_id);
+
+  return queryResult.rows;
+};
+
 export const getAllProductsWithKeyword = async (keyword) => {
   const queryResult = await productRepo.getAllProductsWithKeyword(keyword);
 

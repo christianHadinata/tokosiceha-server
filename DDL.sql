@@ -38,6 +38,15 @@ CREATE TABLE Categories (
   is_active BOOLEAN DEFAULT TRUE NOT NULL
 );
 
+-- Foto untuk di banner halaman kategori, dibuat terpisah sama table Categories karena mungkin aja di masa depan banner nya mau dijadiin carousel yang bisa banyak foto
+CREATE TABLE Category_Images (
+  category_image_id SERIAL PRIMARY KEY,
+  category_id INT REFERENCES Categories(category_id) NOT NULL,
+  category_image_url VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  is_active BOOLEAN DEFAULT TRUE NOT NULL
+)
+
 -- Produk
 -- product_featured_image_url itu gambar utama nya, yang kalau di tokped muncul di card
 CREATE TABLE Products (

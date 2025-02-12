@@ -33,7 +33,8 @@ export const fileUpload = (destination) => {
   const upload = multer({ storage, fileFilter: imageFileFilter, limits });
 
   return upload.fields([
-    { name: "featured_image", maxCount: 1 }, // Single featured image (for display image in card)
-    { name: "images", maxCount: 12 }, // Multiple optional images (max 12) (for etc image)
+    { name: "featured_image", maxCount: 1 }, // Single featured image (for display product image in card)
+    { name: "images", maxCount: 12 }, // Multiple optional images (max 12) (for additional product image)
+    { name: "category_images", maxCount: 12 }, // For category display image in banner
   ]);
 };
