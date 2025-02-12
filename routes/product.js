@@ -9,6 +9,7 @@ import {
   deleteProductImage,
   getAllCategories,
   getAdditionalProductImages,
+  getAllProductsWithKeyword,
 } from "../controllers/product.js";
 
 import { fileUpload } from "../middleware/fileUploader.js";
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.get("/", getAllProducts);
 router.post("/", fileUpload("./public"), createProduct);
+router.get("/search", getAllProductsWithKeyword);
 router.get("/categories", getAllCategories);
 router.get("/:product_id", getSingleProduct);
 router.patch("/:product_id", updateProduct);

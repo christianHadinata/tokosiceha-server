@@ -213,3 +213,30 @@ export const getAllCategories = async () => {
 
   return queryResult;
 };
+
+export const getAllProductsWithKeyword = async (keyword) => {
+  const queryText = `
+  SELECT 
+    p.product_id,
+    p.product_name,
+    p.product_price,
+    p.product_stock,
+    p.product_details,
+    p.product_featured_image_url,
+    c.category_id,
+    c.category_name
+  FROM 
+    Products p 
+  INNER JOIN
+    Categories c
+  ON
+    p.category_id = c.category_id
+  WHERE 
+    p.is_active = TRUE AND p.product_name ILIKE $1`;
+
+  const values = [`%${keyword}%`];
+
+  const queryResult = await pool.query(queryText, values);
+
+  return queryResult;
+};
