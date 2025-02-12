@@ -214,6 +214,106 @@ export const getAllCategories = async () => {
   return queryResult;
 };
 
+export const getSingleCategory = async (category_id) => {
+  const queryText = `
+  SELECT
+    c.category_id,
+    c.category_name
+  FROM
+    Categories c
+  WHERE
+    c.category_id = $1
+  `;
+
+  const values = [category_id];
+
+  const queryResult = await pool.query(queryText, values);
+
+  return queryResult;
+};
+
+export const insertCategoryImages = async (
+  client,
+  category_id,
+  categoryImages
+) => {
+  const queryText = `
+    INSERT INTO Category_Images (category_id, category_image_url)
+    VALUES ($1, $2)
+  `;
+
+  const queries = categoryImages.map((category_image_url) => {
+    const values = [category_id, category_image_url];
+    return client.query(queryText, values);
+  });
+
+  await Promise.all(queries);
+};
+
+export const getCategoryImages = async (category_id) => {
+  const queryText = `
+  SELECT
+    c.category_image_id,
+    c.category_id,
+    c.category_image_url,
+    c.created_at
+  FROM
+    Category_Images c
+  WHERE
+    c.category_id = $1 AND c.is_active = TRUE
+  `;
+
+  const values = [category_id];
+
+  const queryResult = await pool.query(queryText, values);
+
+  return queryResult;
+};
+
+export const deleteCategoryImage = async (client, category_image_id) => {
+  const queryText = `
+  UPDATE
+    Category_Images
+  SET
+    is_active = FALSE
+  WHERE
+    category_image_id = $1
+  `;
+
+  const values = [category_image_id];
+
+  const queryResult = await client.query(queryText, values);
+
+  return queryResult;
+};
+
+export const getAllProductsWithCategory = async (category_id) => {
+  const queryText = `
+  SELECT 
+    p.product_id,
+    p.product_name,
+    p.product_price,
+    p.product_stock,
+    p.product_details,
+    p.product_featured_image_url,
+    c.category_id,
+    c.category_name
+  FROM 
+    Products p 
+  INNER JOIN
+    Categories c
+  ON
+    p.category_id = c.category_id
+  WHERE 
+    c.category_id = $1 AND p.is_active = TRUE`;
+
+  const values = [category_id];
+
+  const queryResult = await pool.query(queryText, values);
+
+  return queryResult;
+};
+
 export const getAllProductsWithKeyword = async (keyword) => {
   const queryText = `
   SELECT 
