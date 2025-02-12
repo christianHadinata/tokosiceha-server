@@ -1,5 +1,6 @@
 import { BadRequestError } from "../errors/BadRequestError.js";
 import * as productService from "../services/product.js";
+import { normalizeKeyword } from "../utils/normalizeKeyword.js";
 
 export const getAllProducts = async (req, res) => {
   const products = await productService.getAllProducts();
@@ -133,4 +134,26 @@ export const getAllCategories = async (req, res) => {
   const categories = await productService.getAllCategories();
 
   return res.json(categories);
+};
+
+export const getAllProductsWithKeyword = async (req, res) => {
+  let { keyword } = req.query;
+
+  if (!keyword) {
+    return res.status(400).json({ error: "Keyword is required" });
+  }
+
+  keyword = normalizeKeyword(keyword);
+
+  try {
+    const products = await productService.getAllProductsWithKeyword(keyword);
+
+    if (products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    return res.json(products);
+  } catch (error) {
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };

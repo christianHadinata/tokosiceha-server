@@ -165,3 +165,9 @@ export const getAllCategories = async () => {
 
   return queryResult.rows;
 };
+
+export const getAllProductsWithKeyword = async (keyword) => {
+  const queryResult = await productRepo.getAllProductsWithKeyword(keyword);
+
+  return queryResult.rows;
+};
