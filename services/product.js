@@ -133,6 +133,12 @@ export const addProductImages = async (product_id, additionalImages) => {
   }
 };
 
+export const getAdditionalProductImages = async (product_id) => {
+  const queryResult = await productRepo.getAdditionalProductImages(product_id);
+
+  return queryResult.rows;
+};
+
 export const deleteProductImage = async (product_image_id) => {
   const client = await pool.connect();
 
